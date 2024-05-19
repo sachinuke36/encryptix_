@@ -1,0 +1,227 @@
+const express = require('express')
+const app = express();
+const cors = require('cors')
+const bodyParser = require('body-parser');
+const port = 4000;
+const jwt = require ('jsonwebtoken') // for authentication
+const bcrypt = require('bcrypt') 
+const  validator = require('validator');
+const { ObjectId } = require('mongodb');
+
+require('dotenv').config()
+
+
+//middlewares
+// app.use(express.json()) 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors()); 
+app.use(bodyParser.json());
+
+
+
+
+//database config
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const { genSalt } = require('bcrypt');
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.t41qjji.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    
+try {
+  await client.connect();
+} catch (error) {
+  console.log("Coudn't connect to datatabse")
+}
+    //creating database
+    const db = client.db("JobDekho");
+
+    //creating collection
+    const jobCollections = db.collection("jobs");
+
+    //post a job
+    app.post("/post-job", async(req,res)=>{
+            const body = req.body;
+            body.createdAt = new Date();
+            const data = await jobCollections.insertOne(body);
+            if(data.insertedId){
+                return res.status(200).json({success:true,message:'job added',data:data})
+            }else{
+                return res.status(404).send({
+                    message:'cannot insert! try again later',
+                    status:false
+                })
+            }
+    })
+
+    //get all jobs
+    app.get('/all-jobs',async(req,res)=>{
+            const jobs = await jobCollections.find({}).toArray();
+            res.send(jobs);
+            // console.log(jobs)
+    })
+
+    //delete a job
+    app.post('/delete-job/:id',async(req,res)=>{
+      try {
+
+      //getting the id 
+      const jobId = req.params.id;
+
+      //searching for the document using id 
+      const job = await jobCollections.findOne({_id: new ObjectId(jobId)});
+      if(job._id){
+        await jobCollections.deleteOne(job);
+        res.json({success:true, message:'Job deleted successfully'})
+
+      }
+      } catch (error) {
+        console.log(error);
+        res.json({success:false, message:'Error occured'})
+      }})
+
+
+      // get according to minimum salary
+      app.get('/min-salary', async (req,res)=>{
+        try {
+        let minSalary = req.query.min_salary;
+        const jobs = await jobCollections.find({min_salary:{$gte:minSalary}}).toArray();
+        res.json({success:true, data:jobs});
+        console.log(jobs)
+        } catch (error) {
+          console.log(error)
+        }
+        
+      })
+
+
+      //jobs according to profile
+      app.get('/job-profile', async(req,res)=>{
+        try {
+          let jobProfile = req.body.profile;
+          const jobs = await jobCollections.find({title:jobProfile}).toArray();
+          console.log(jobs)
+          // res.json({success:true, data:jobs});
+        } catch (error) {
+          console.log(error);
+          res.status(404).json({success:false, message:"Job not found"});
+        }
+      })
+
+
+
+      //--------------------------- For user Auth ------------------------------------//
+
+                  //-------------- creating a new collection --------------//
+             const userCollection = db.collection("user");
+
+
+               //-------------- creating token ------------------//
+               const createToken = (userId)=>{
+                 const payload = {
+                  id : userId
+                 };
+                  return jwt.sign(payload,process.env.JWT_KEY)
+               }
+
+          //------------ Login -----------------//
+          app.post('/login',async (req,res)=>{
+              const email = req.body.email;
+              const password = req.body.password;
+              try {
+                const user = await userCollection.findOne({email:email});
+                if(!user){
+                  return res.json({success:false, message:'user does not exist'})
+                }
+                const isUser = await bcrypt.compare(password, user.password);
+                if(!isUser){
+                  return res.json({success:false, message:'Invalid credentials'})
+                }
+                // console.log(user._id)
+                const token = createToken(user._id);
+                res.json({success:true, token});
+              } catch (error) {
+                console.log(error);
+                res.json({success:false, message:'Error'});
+              }
+          })
+
+          //---------------- register user ----------------------//
+          app.post('/register',async(req,res)=>{
+
+            try {
+              const {fname, email, password} = req.body;
+
+            //---------- checking if user already has an account--------//
+            const user = await userCollection.findOne({email:email});
+            if(user){
+              return res.json({success:false,message:'Already have an account'})
+            }
+
+            if(!validator.isEmail(email)){
+              return res.json({success:false, message:'Enter a valid Email'})
+            }
+            const salt = await genSalt(10);
+            const hashedPass = await bcrypt.hash(password,salt);
+            const newUser = await userCollection.insertOne({name:fname,email:email,password:hashedPass});
+            console.log(newUser.insertedId);
+            const token = createToken(newUser.insertedId);
+            res.json({success:true, data:token})
+            // console.log(token)
+
+            } catch (error) {
+              console.log(error);
+              res.json({success:false, message:'Error occured'})
+              
+            }
+          })
+
+
+
+
+
+
+
+
+   
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log(" You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+  }
+}
+// run().catch(console.dir);
+
+
+app.listen(port,()=>{
+  console.log(`server is listening to http://localhost:${port}`)
+})
+run().catch(console.dir);
+client.close();
+
+
+
+
+
+//user: sachinuke36
+//pass: X6iKHGkyk4by7uhD
+//url:mongodb+srv://<username>:<password>@cluster0.t41qjji.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+// app.use('/api/',postJobRouter)
+// connectDB();
+// app.use(bodyParser.json());
+
+
+
+

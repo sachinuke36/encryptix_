@@ -1,0 +1,79 @@
+.post-a-job{
+    border: 1px solid rgb(63, 59, 59);
+    border-radius: 4px;
+    width: 80%;
+    height: 150vh;
+    margin: 4vh auto;
+    display: flex;
+    flex-direction: column; 
+    padding: 10px; 
+}
+.flex{
+    display: flex;
+    margin: 2vh 0;
+    justify-content: space-between;
+}
+.flex-col{
+    display: flex;
+    flex-direction: column;   
+    justify-content: space-between;
+}
+.post-a-job input{
+    width: 450px;
+    height: 10px;
+    padding: 10px;
+    /* background-color: white; */
+    font-size: medium;
+    outline: none;
+}
+.post-a-job select{
+    width: 468px;
+    text-align: center;
+    height: 30px;
+    outline: none;
+
+
+}
+.post-a-job textarea{
+    height: 100px;
+    padding: 10px;
+    outline: none;
+    font-size: medium;
+    max-height: 150px;
+    min-height: 150px;
+    max-width: 98%;
+    min-width: 98%;
+}
+.button{
+    margin-top: 2vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.post-a-job .button button{
+    width: 150px;
+    height: 40px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: none;
+    color: black ;
+    background-color: aquamarine;
+}
+
+.company_description{
+    margin-top: 3vh;
+}
+.skills-creatable{
+    color: black;
+    background-color: #f0f0f0;
+}
+.perks-creatable{
+    color: black;
+    background: black;
+}
+.none{
+    display: none;
+}
+.mt-2{
+    margin-top: 2px;
+}
