@@ -24,6 +24,7 @@ const authenticate = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_KEY);
     req.user = decoded;
+    console.log("user authenticated")
     next();
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });

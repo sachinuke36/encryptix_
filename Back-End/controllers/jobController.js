@@ -9,7 +9,6 @@ const userCollection = getDB().collection("user");
 
 //---------------------- Post a Job -----------------------------//
 const postJob = async (req, res) => {
-  // console.log(req)
   const body = req.body;
   const { token } = req.headers;
   if (!token) {
@@ -38,7 +37,6 @@ const postJob = async (req, res) => {
 
 //-------------------------------- get all jobs ------------------------------------//
 const getAllJobs = async (req, res) => {
-  // console.log(req)
   const jobs = await jobCollections.find({}).toArray();
   res.send(jobs);
 };
@@ -62,6 +60,20 @@ const deleteJob = async (req, res) => {
     res.json({ success: false, message: 'Error occurred' });
   }
 };
+
+
+
+
+//-------------- fetching the jobs by id -------------------------//
+const getJobById = async (req,res)=>{
+  try {
+    const jobId = req.params.id ;
+    const job = await jobCollections.findOne({_id: new ObjectId(jobId)});
+    res.json({success:true, job:job});
+  } catch (error) {
+    console.log("Error aa gaya")
+  }
+}
 
 
 
@@ -135,15 +147,10 @@ const filterJobs = async (req,res)=>{
         else{
           query[key] = value;
         }
-      } else {
-      }
+      } 
     });
-    
-    console.log("Updated query:", query);
-  
   try {
       const filtered_jobs = await jobCollections.find(query).toArray();
-      console.log("this is filtered data:",filtered_jobs.length)
       res.json({success:true, data:filtered_jobs});
   } catch (error) {
     res.json({success:false, message:'something is wrong'});
@@ -151,4 +158,24 @@ const filterJobs = async (req,res)=>{
 
 }
 
-module.exports = { postJob, getAllJobs, deleteJob, getJobsByMinSalary, getJobsByProfile, deleteJOB, filterJobs };
+
+//---------------------------- Fetch job posted by employer ----------------------------//
+    const getMyJobs = async (req,res)=>{
+      const {token} = req.headers;
+      const verified_token = jwt.verify(token,process.env.JWT_KEY);
+      try {
+        const myJobs = await jobCollections.find({job_by: new ObjectId(verified_token.id)}).toArray();
+        res.json({success:true, data:myJobs});
+      } catch (error) {
+        res.json({success:false, message:"coudn't find jobs"})
+        console.log(error);
+        
+      }      
+      
+      
+    }
+
+
+
+
+module.exports = { postJob,getMyJobs, getJobById, getAllJobs, deleteJob, getJobsByMinSalary, getJobsByProfile, deleteJOB, filterJobs };
