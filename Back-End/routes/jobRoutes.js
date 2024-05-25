@@ -1,5 +1,5 @@
 const express = require('express');
-const { postJob,getMyJobs, getAllJobs, deleteJob, deleteJOB, getJobsByMinSalary, getJobsByProfile, filterJobs, getJobById } = require('../controllers/jobController');
+const { postJob,getMyJobs, getAllJobs, deleteJob, deleteJOB, getJobsByMinSalary, getJobsByProfile, filterJobs, getJobById, applyForJob } = require('../controllers/jobController');
 const { authenticate } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.get('/min-salary', getJobsByMinSalary);
 router.get('/job-profile', getJobsByProfile);
 router.post('/filtered-jobs', filterJobs);
 router.get('/my_jobs',getMyJobs);
+router.patch('/apply',applyForJob)
 
 module.exports = router;  // Ensure the router is correctly exported

@@ -32,10 +32,10 @@ const { genSalt } = require('bcrypt');
       }
       // console.log(user._id)
       const token = createToken(user._id);
-      res.json({success:true, token});
+     return  res.json({success:true, token});
     } catch (error) {
       console.log(error);
-      res.json({success:false, message:'Error'});
+      return res.json({success:false, message:'Error'});
     }
 }
 
@@ -62,21 +62,26 @@ const registerUser = async(req,res)=>{
     const salt = await genSalt(10);
     const hashedPass = await bcrypt.hash(password,salt);
     const newUser = await userCollection.insertOne({name:fname,email:email,password:hashedPass});
-    console.log(newUser.insertedId);
     const token = createToken(newUser.insertedId);
-    res.json({success:true, data:token})
-    // console.log(token)
+    return res.json({success:true, data:token})
 
     } catch (error) {
       console.log(error);
-      res.json({success:false, message:'Error occured'})
+      return res.json({success:false, message:'Error occured'})
       
     }
   }
 
+
+  const updateResume = async(req,res)=>{
+    const {resume} = req.body;
+    console.log("resume",resume)
+  }
+
   module.exports = {
     loginUser,
-    registerUser
+    registerUser,
+    updateResume
   };
 
 

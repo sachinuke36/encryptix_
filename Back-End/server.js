@@ -26,6 +26,7 @@ connectDB();
 //------------------------------------ Routes -----------------------------------//
 app.use('/employer',authRouter)
 app.use('/job', router);
+app.use('/job_seeker',authRouter);
 
 
 

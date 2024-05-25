@@ -1,0 +1,53 @@
+.my-job-card{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    border: 1px solid white;
+}
+
+.my-job-card .company{
+    color: gray;
+}
+.my-job-card .location{
+    display: flex;
+    gap: 4px;
+}
+.my-job-card .location p{
+display: flex;
+align-items: center;
+}
+.my-job-card-middle{
+    display: flex;
+    justify-content: space-evenly;
+    /* border: 1px solid white; */
+    padding: 5px;
+}
+.fhc {
+    display: flex;
+    flex-direction: column;
+    gap:2px;
+    padding: 2px;
+}
+.fh{
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.fh p{
+    display: flex;
+    align-items: center;
+}
+.my-job-card .buttons{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.my-job-card .buttons button{
+   padding: 7px 20px;
+   font-size: 18px;
+   background-color: rgb(80, 81, 81);
+   outline: none;
+   color: rgb(251, 251, 247);
+   border-radius: 3px;
+}

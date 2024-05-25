@@ -1,9 +1,11 @@
 const { getDB } = require('../config/database');
 const { ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
+const { json } = require('body-parser');
 
 const jobCollections = getDB().collection("jobs");
 const userCollection = getDB().collection("user");
+const jobSeekersCollection = getDB().collection('jobSeekers')
 
 
 
@@ -28,7 +30,7 @@ const postJob = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: 'Error occurred in posting a job' });
+   return res.json({ success: false, message: 'Error occurred in posting a job' });
   }
 };
 
@@ -38,7 +40,7 @@ const postJob = async (req, res) => {
 //-------------------------------- get all jobs ------------------------------------//
 const getAllJobs = async (req, res) => {
   const jobs = await jobCollections.find({}).toArray();
-  res.send(jobs);
+  return res.send(jobs);
 };
 
 
@@ -52,12 +54,12 @@ const deleteJob = async (req, res) => {
     const jobId = req.params.id;
     const job = await jobCollections.findOne({ _id: new ObjectId(jobId) });
     if (job._id) {
-      await jobCollections.deleteOne(job);
-      res.json({ success: true, message: 'Job deleted successfully' });
+     const response = await jobCollections.deleteOne(job);
+     return res.status(200).json({ success: true, message: 'Job deleted successfully' });
     }
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: 'Error occurred' });
+   return res.json({ success: false, message: 'Error occurred' });
   }
 };
 
@@ -69,9 +71,10 @@ const getJobById = async (req,res)=>{
   try {
     const jobId = req.params.id ;
     const job = await jobCollections.findOne({_id: new ObjectId(jobId)});
-    res.json({success:true, job:job});
+    return res.json({success:true, job:job});
   } catch (error) {
-    console.log("Error aa gaya")
+    console.log("Error")
+    return res.json({success:false, message:"Error"})
   }
 }
 
@@ -82,9 +85,9 @@ const getJobById = async (req,res)=>{
 const deleteJOB = async(req,res)=>{
   try {
    const response = await jobCollections.updateMany({},{$set: {type:"internship"}});
-      res.json({success:true, message:'updated'});
+     return res.json({success:true, message:'updated'});
   } catch (error) {
-    res.json({success:false, message:"Error occured"})
+   return res.json({success:false, message:"Error occured"})
   }
  
 }
@@ -99,9 +102,9 @@ const getJobsByMinSalary = async (req, res) => {
   try {
     let minSalary = req.query.min_salary;
     const jobs = await jobCollections.find({ min_salary: { $gte: minSalary } }).toArray();
-    res.json({ success: true, data: jobs });
+   return res.json({ success: true, data: jobs });
   } catch (error) {
-    console.error(error);
+   return console.error(error);
   }
 };
 
@@ -114,10 +117,10 @@ const getJobsByProfile = async (req, res) => {
   try {
     let jobProfile = req.body.profile;
     const jobs = await jobCollections.find({ title: jobProfile }).toArray();
-    res.json({ success: true, data: jobs });
+   return res.json({ success: true, data: jobs });
   } catch (error) {
     console.error(error);
-    res.status(404).json({ success: false, message: "Job not found" });
+    return res.status(404).json({ success: false, message: "Job not found" });
   }
 };
 
@@ -130,9 +133,7 @@ const filterJobs = async (req,res)=>{
   if(work_from_home===''){
     
   }
-  console.log("experience:",experience);
-    let query = {
-    };
+    let query = {};
 
     Object.keys(req.body).forEach(key => {
       const value = req.body[key];
@@ -151,9 +152,9 @@ const filterJobs = async (req,res)=>{
     });
   try {
       const filtered_jobs = await jobCollections.find(query).toArray();
-      res.json({success:true, data:filtered_jobs});
+     return res.json({success:true, data:filtered_jobs});
   } catch (error) {
-    res.json({success:false, message:'something is wrong'});
+    return res.json({success:false, message:'something is wrong'});
   }
 
 }
@@ -165,17 +166,38 @@ const filterJobs = async (req,res)=>{
       const verified_token = jwt.verify(token,process.env.JWT_KEY);
       try {
         const myJobs = await jobCollections.find({job_by: new ObjectId(verified_token.id)}).toArray();
-        res.json({success:true, data:myJobs});
+       return  res.json({success:true, data:myJobs});
       } catch (error) {
-        res.json({success:false, message:"coudn't find jobs"})
-        console.log(error);
-        
-      }      
-      
-      
+        return res.json({success:false, message:"coudn't find jobs"})
+        console.log(error); 
+      }       
+    }
+
+
+
+    //------------------------- update job info -----------------------------//
+
+    const applyForJob = async (req,res)=>{
+     const {token} = req.headers;
+     const {id} = req.body;
+     const userId = await jwt.verify(token, process.env.JWT_KEY).id;
+     if(!userId){
+      return res.json({success:false, message:"user not found"});
+     }
+     try {
+      const response = await jobCollections.updateOne({ _id: new ObjectId(id) },{ $push:{applied_by: userId} } );
+       await jobSeekersCollection.updateOne({_id:new ObjectId(userId)},{$push:{applied_for:id}})
+           if(response.modifiedCount>0){
+            return res.json({success:true, message:"applied for the job"})
+           }
+
+     } catch (error) {
+      return res.json({success:false, error})
+     }
+     
     }
 
 
 
 
-module.exports = { postJob,getMyJobs, getJobById, getAllJobs, deleteJob, getJobsByMinSalary, getJobsByProfile, deleteJOB, filterJobs };
+module.exports = { postJob, applyForJob ,getMyJobs, getJobById, getAllJobs, deleteJob, getJobsByMinSalary, getJobsByProfile, deleteJOB, filterJobs };

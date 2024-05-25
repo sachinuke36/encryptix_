@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import './PostJob.css'
-import { Context } from '../../../Front-End/src/Context/StoreContext';
+import { Context } from '../../../../Front-End/src/Context/StoreContext';
 import axios from 'axios';
 import CreaTableSelect from 'react-select/creatable';
 const PostJob = () => {
@@ -29,7 +29,6 @@ const PostJob = () => {
     type:''});
     const handleSubmit = async (e) => {
         e.preventDefault();   
-            console.log(`${url}/job/post-job`);
             const token = localStorage.getItem('token')
             let response = await axios.post( `${url}/job/post-job`, data,{headers:{token}});
        
@@ -59,12 +58,8 @@ const PostJob = () => {
     
     const handleChange = (e, fieldName) => {
     if(fieldName !== 'skills' && fieldName !== 'perks' && fieldName !== ''){
-        console.log(fieldName)
-        console.log('wo yaha aya')
         const name = e.target.name;
         let value = e.target.value;
-        console.log("name:",name)
-        console.log("value",value);
 
          if(name==='min_salary' || name==='max_salary' || name==='openings'){
             value = Number(value);
@@ -80,15 +75,6 @@ const PostJob = () => {
             }  
     }
 
-
-   
-    
-
-    useEffect(() => {
-      
-    console.log(data)
-      
-    }, [data])
     
 
 

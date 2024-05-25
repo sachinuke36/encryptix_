@@ -1,6 +1,6 @@
 import React,{useState, useContext} from 'react'
 import './Login.css'
-import {Context} from '../../../Front-End/src/Context/StoreContext';
+import { Context } from '../../../../Front-End/src/Context/StoreContext';
 import axios from 'axios' 
 import { useNavigate } from "react-router-dom";
 
@@ -22,19 +22,14 @@ const Login = () => {
              newUrl = url+"/employer/register"
           }
           const response = await axios.post(newUrl,formData);
-          console.log(response);
           if(response.data.success){
             setToken(response.data.token);
-            console.log("token",response.data.token);
             localStorage.setItem("token",response.data.token);
-            navigate('/home');
+            navigate('/');
             setIsLoggedIn(true);
           }else{
               console.log(response.data.message);
           }
-
-        
-
     }
 
     const handleChange = (e)=>{

@@ -3,11 +3,23 @@
     margin: 0 auto;
     /* border: 1px solid red; */
     display: flex;
+    justify-content: space-evenly;
     align-items: center;
     gap: 10px;
+    color: white;
+    padding: 2vh 3px 1px 3px;
+}
+.navbar h3{
+    font-size: 28px;
+    color: white;
+}
+.navbar h3 span{
+    color: rgb(46, 178, 134);
 }
 .navbar-right{
     position: relative;
+    display: flex;
+    gap: 2vw;
     
 }
 .links{
@@ -15,6 +27,17 @@
     align-items: center;
     gap: 50px;
     justify-content: space-around;
+    color: white;
+}
+.links a{
+    color: white;
+    font-size: 18px;
+}
+.profile {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+
 }
 .profile .dropdown{
     display: none;
@@ -30,9 +53,9 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 39px;
+    top: 23px;
     background-color: rgb(131, 196, 179);
-    z-index: 0;
+    z-index: 1;
 }
 .profile ul li{
     color: black;
@@ -45,3 +68,6 @@
    background-color: rgb(98, 157, 69);
 }
 
+.active{
+    border-bottom: 2px solid aquamarine;
+}
